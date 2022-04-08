@@ -50,6 +50,7 @@ namespace Minis
             }
 
             RtMidiDll.OpenPort(_rtmidi, (uint)portNumber, "RtMidi Input");
+            RtMidiDll.InIgnoreTypes(_rtmidi, false, false, false);
         }
 
         ~MidiPort()
