@@ -99,7 +99,7 @@ namespace Minis
                     GetChannelDevice(channel).ProcessNoteOff(data1);
                 else if (status == 0xb)
                     GetChannelDevice(channel).ProcessControlChange(data1, data2);
-                else if (status == 0xF)
+                else if (status == 0xF8)
                     GetChannelDevice(channel).ProcessBeatClockTick();
             }
         }
