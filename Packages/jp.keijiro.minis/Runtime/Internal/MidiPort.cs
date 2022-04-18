@@ -50,7 +50,7 @@ namespace Minis
             }
 
             RtMidiDll.OpenPort(_rtmidi, (uint)portNumber, "RtMidi Input");
-            RtMidiDll.InIgnoreTypes(_rtmidi, false, false, false);
+            RtMidiDll.InIgnoreTypes(_rtmidi, true, false, true);
         }
 
         ~MidiPort()
@@ -93,14 +93,17 @@ namespace Minis
 
                 var noteOff = (status == 8) || (status == 9 && data2 == 0);
 
+                if (status == 0xF)
+                {
+                    GetChannelDevice(channel).ProcessBeatClockTick1();
+                }
+
                 if (status == 9 && !noteOff)
                     GetChannelDevice(channel).ProcessNoteOn(data1, data2);
                 else if (noteOff)
                     GetChannelDevice(channel).ProcessNoteOff(data1);
                 else if (status == 0xb)
                     GetChannelDevice(channel).ProcessControlChange(data1, data2);
-                else if (status == 0xF8)
-                    GetChannelDevice(channel).ProcessBeatClockTick();
             }
         }
 

@@ -38,6 +38,7 @@ namespace Minis
 
         void Start()
         {
+            Debug.Log("hello from MidiDeviceAssigner");
             foreach (var device in InputSystem.devices)
                 TryPairing(device);
 

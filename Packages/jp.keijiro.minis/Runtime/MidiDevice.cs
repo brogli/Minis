@@ -74,16 +74,32 @@ namespace Minis
             remove => _willControlChangeActions.Remove(value);
         }
 
+        // Will-beatclock-change event
+        //
+        // The input system fires this event before processing a CC message on this
+        // device instance. It gives a target CC object and a control value as
+        // event arguments. Note that the MidiNoteControl hasn't been updated at
+        // this point.
+        public event Action<MidiClockControl, float> onWillClockChange
+        {
+            // Action list lazy allocation
+            add => (_willClockChangeActions = _willClockChangeActions ??
+                    new List<Action<MidiClockControl, float>>()).Add(value);
+            remove => _willClockChangeActions.Remove(value);
+        }
+
         #endregion
 
         #region Internal objects
 
         MidiNoteControl[] _notes;
         MidiValueControl[] _controls;
+        MidiClockControl[] _clock;
 
         List<Action<MidiNoteControl, float>> _willNoteOnActions;
         List<Action<MidiNoteControl>> _willNoteOffActions;
         List<Action<MidiValueControl, float>> _willControlChangeActions;
+        List<Action<MidiClockControl, float>> _willClockChangeActions;
 
         private const int _beatClockTicksForOneBeat = 24;
         private const int _beatClockTicksForTwoBeats = _beatClockTicksForOneBeat * 2;
@@ -128,7 +144,37 @@ namespace Minis
                     action(_controls[number], fvalue);
         }
 
-        internal void ProcessBeatClockTick()
+        //internal void ProcessBeatClockTick()
+        //{
+        //    if (OneBeatClockCounter < _beatClockTicksForOneBeat)
+        //    {
+        //        OneBeatClockCounter++;
+        //    }
+        //    else
+        //    {
+        //        OneBeatClockCounter = 1;
+        //    }
+
+        //    if (TwoBeatsClockCounter < _beatClockTicksForTwoBeats)
+        //    {
+        //        TwoBeatsClockCounter++;
+        //    }
+        //    else
+        //    {
+        //        TwoBeatsClockCounter = 1;
+        //    }
+
+        //    if (FourBeatsClockCounter < _beatClockTicksForFourBeats)
+        //    {
+        //        FourBeatsClockCounter++;
+        //    }
+        //    else
+        //    {
+        //        FourBeatsClockCounter = 1;
+        //    }
+        //}
+
+        internal void ProcessBeatClockTick1()
         {
             if (OneBeatClockCounter < _beatClockTicksForOneBeat)
             {
@@ -138,24 +184,13 @@ namespace Minis
             {
                 OneBeatClockCounter = 1;
             }
+            // State update with a delta event
+            InputSystem.QueueDeltaStateEvent(_clock[OneBeatClockCounter], (byte)0);
 
-            if (TwoBeatsClockCounter < _beatClockTicksForTwoBeats)
-            {
-                TwoBeatsClockCounter++;
-            }
-            else
-            {
-                TwoBeatsClockCounter = 1;
-            }
-
-            if (FourBeatsClockCounter < _beatClockTicksForFourBeats)
-            {
-                FourBeatsClockCounter++;
-            }
-            else
-            {
-                FourBeatsClockCounter = 1;
-            }
+            // clock-change event invocation (only when it exists)
+            if (_willClockChangeActions != null)
+                foreach (var action in _willClockChangeActions)
+                    action(_clock[OneBeatClockCounter], OneBeatClockCounter);
         }
 
         #endregion
@@ -169,11 +204,13 @@ namespace Minis
             // Populate the input controls.
             _notes = new MidiNoteControl[128];
             _controls = new MidiValueControl[128];
+            _clock = new MidiClockControl[128];
 
             for (var i = 0; i < 128; i++)
             {
                 _notes[i] = GetChildControl<MidiNoteControl>("note" + i.ToString("D3"));
                 _controls[i] = GetChildControl<MidiValueControl>("control" + i.ToString("D3"));
+                _clock[i] = GetChildControl<MidiClockControl>("midiclock" + i.ToString("D3"));
             }
 
             // MIDI channel number determination

@@ -15,6 +15,7 @@ namespace Minis
         public MidiProbe()
         {
             _rtmidi = RtMidiDll.InCreateDefault();
+            RtMidiDll.InIgnoreTypes(_rtmidi, true, false, true);
 
             if (_rtmidi == null || !_rtmidi->ok)
                 UnityEngine.Debug.LogWarning("Failed to create an RtMidi device object.");
