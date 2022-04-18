@@ -28,6 +28,7 @@ namespace Minis
         {
             _channel = serializedObject.FindProperty("_channel");
             _productName = serializedObject.FindProperty("_productName");
+            Debug.Log("hello from MidiDeviceAssignerEditor");
         }
 
         public override void OnInspectorGUI()

@@ -21,6 +21,7 @@ namespace Minis
         {
             InputSystem.RegisterLayout<MidiNoteControl>("MidiNote");
             InputSystem.RegisterLayout<MidiValueControl>("MidiValue");
+            InputSystem.RegisterLayout<MidiClockControl>("MidiClock");
 
             InputSystem.RegisterLayout<MidiDevice>(
                 matches: new InputDeviceMatcher().WithInterface("Minis")
@@ -75,6 +76,7 @@ namespace Minis
             // We use not only PlayerLoopSystem but also the
             // EditorApplication.update callback because the PlayerLoop events
             // are not invoked in the edit mode.
+
             UnityEditor.EditorApplication.update += () => _driver?.Update();
 
             // Uninstall the driver on domain reload.
